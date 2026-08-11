@@ -56,8 +56,6 @@
       <span class="hero__author"><a href="#">Emre Doruk Taşkın</a></span>,
       <span class="hero__author"><a href="#">Yunus Emre Karaoglan</a></span>,
       <span class="hero__author"><a href="#">Iñigo Miguel Méndez Valero</a></span>
-      <!-- FILL: personal/scholar links above, or drop the <a> and keep plain text.
-           Add <sup class="affil">1</sup> markers here if affiliations ever differ. -->
     </p>
 
     <p class="hero__meta">
@@ -100,15 +98,11 @@
         </video>
         -->
         <div class="media-placeholder">
-          <span>Teaser loop</span>
-          <code>static/videos/teaser.mp4</code>
-          <span>Suggested: dream rollout beside the same chunks replayed in the simulator.</span>
+          <img src="static/videos/teaser.gif"/>
         </div>
       </div>
       <figcaption class="figure__caption">
-        <span class="todo">FILL</span> One or two sentences that make the loop legible without
-        the reader having scrolled anywhere else — what is on the left, what is on the right,
-        and what they should notice.
+        Starting from a Behavior Cloning (BC) policy trained on expert trajectories, PPO improves the policy entirely inside LeWM, with no additional real-environment interaction.
       </figcaption>
     </figure>
   </div>
@@ -123,28 +117,22 @@
     <h2 class="section__title">Abstract</h2>
 
     <p>
-      <span class="todo">FILL — ~120 words, tightened from the README summary.</span>
-      LeWorldModel is a joint-embedding predictive architecture that learns PushT dynamics in a
-      192-d latent space from pixels. If those dynamics are good enough, everything an RL agent
-      needs — states, transitions, rewards, termination — can be produced inside the model, and
-      policy improvement becomes an offline procedure.
+      Training agents through real-world interaction is notoriously costly and challenging. World models offer a promising alternative by learning environment dynamics, enabling agents to plan and improve policies using simulated experience. JEPAs (Joint-Embedding Predictive Architectures) predict future representations rather than pixels; LeJEPA enables stable, collapse-free representation learning through SIGReg, and LeWorldModel (LeWM) extends this idea to temporal prediction directly from visual observations. While LeWM has primarily been explored as a model for planning, we investigate whether it can instead serve as the environment for reinforcement-learning policy improvement with no additional real-environment interaction. Specifically, we ask whether LeWM can provide sufficiently accurate states, transitions, and reward signals for policy optimization to take place entirely within its learned dynamics.
     </p>
 
     <p>
-      <span class="todo">FILL</span> Second paragraph: what you built, what it scores, and the
-      catch. End on the finding that makes the page worth reading rather than on the headline
-      number.
+      We train a Behavior Cloning (BC) policy on expert demonstrations from <a href="https://diffusion-policy.cs.columbia.edu/">Diffusion Policy</a>, along with reward classifiers and an inverse projector for policy learning inside LeWM. Fine-tuning the policy with PPO entirely through imagined LeWM rollouts raises real-environment success from 56.0% to 77.6%, a <b>38.6% relative improvement without additional real-environment interaction</b>. Yet continued optimization eventually saturates: rollout error grows under distribution shift while reward predictions become increasingly optimistic, producing an imagination–reality gap in which improvements seen by PPO no longer reliably translate back to the real environment.
     </p>
 
     <!-- Headline numbers. Delete this block if the abstract carries them well enough alone. -->
     <div class="stats">
       <div class="stat">
-        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__value">77.6%</div>
         <div class="stat__label">Dream PPO success, real task</div>
       </div>
       <div class="stat">
         <div class="stat__value">0</div>
-        <div class="stat__label">Environment transitions consumed</div>
+        <div class="stat__label">Additional environment transitions consumed</div>
       </div>
       <div class="stat">
         <div class="stat__value"><span class="todo">—</span></div>
