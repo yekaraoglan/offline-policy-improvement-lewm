@@ -456,15 +456,141 @@
       episodes — the sample sizes behind each row.
     </p>
 
-    <div class="grid grid--2">
+    <!-- ---- RQ: reward optimism gap ---------------------------------------- -->
+    <h3 class="panel__title" id="optimism-gap" style="margin: 2.5rem 0 0.75rem;">
+      The world model is optimistic about its own reward
+    </h3>
+    <p>
+      Both curves below come from the same weights at the same moment of training. The imagined one
+      is what PPO is really maximising: deterministic rollouts inside LeWM from held-out expert
+      start states, scored by the frozen success probe. The real one is that same checkpoint
+      evaluated in the simulator. It is recorded for diagnosis only, and with dream selection it
+      never decides which checkpoint is kept. In both reward modes the imagined curve sits above
+      the real one at every point of training, and the gap never closes.
+    </p>
+
+    <p>
+      The practical consequence is that the imagined number is not a success rate. It is an upper
+      bound, and it is not a constant offset that you could simply subtract: the gap is widest at
+      the start, when the policy is still close to the BC prior, and it moves around by tens of
+      points during training. The two reward modes also fail differently. Under sparse reward the
+      gap settles at roughly 15 points and stays there, so imagined progress and real progress at
+      least move in the same direction. Under dense reward the gap narrows until about 2.5M
+      imagined steps and then widens again to over 20 points, because imagined success keeps
+      climbing towards 95% while real success stops near 70%. The shaped reward gives PPO more room
+      to find behaviour that the probe likes and the simulator does not.
+    </p>
+
+    <div class="grid grid--2" style="margin-top: 1.5rem;">
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media figure__media--plate">
+          <img src="static/images/rq2_optimism_gap_sparse.png"
+               alt="Sparse dream run: imagined success stays above real held-out success across 5M imagined training steps, with the gap between them plotted below.">
+        </div>
+        <figcaption class="figure__caption">
+          <b>Sparse reward.</b> Imagined success against real held-out success for the same
+          weights, over 5M imagined training steps (bold line is the mean over 3 seeds, thin lines
+          are individual seeds). The lower panel is the difference between the two. The gap falls
+          from about 35 points to roughly 15 within the first million steps and then stays flat.
+        </figcaption>
+      </figure>
+
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media figure__media--plate">
+          <img src="static/images/rq2_optimism_gap_dense.png"
+               alt="Dense dream run: imagined success stays above real held-out success across 5M imagined training steps, with the gap between them plotted below.">
+        </div>
+        <figcaption class="figure__caption">
+          <b>Dense reward.</b> The same measurement for the dream arm trained with the
+          time-to-success classifier. Here the gap does not settle: after about 2.5M steps it grows
+          again, because the imagined curve keeps rising while the real one flattens.
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- ---- RQ: improvement stops ------------------------------------------ -->
+    <h3 class="panel__title" id="improvement-stops" style="margin: 2.5rem 0 0.75rem;">
+      Improvement stops well before the imagined budget runs out
+    </h3>
+    <p>
+      Real held-out success rises quickly and then stops. Almost all of the improvement happens in
+      the first 3M imagined steps, where both arms move from about 50%, the level of the BC prior,
+      into the middle 70s. After that the curves are flat: the fits over the second half of
+      training are close to horizontal, and the last 5M imagined steps are worth a few points at
+      most.
+    </p>
+
+    <p>
+      This is worth stating clearly, because imagined steps are the cheap resource here. They cost
+      no environment interaction, so the natural reaction to a plateau is to dream for longer. The
+      measurement says that does not work. What limits the policy is not how much imagined
+      experience it gets, but how accurate that experience is. Once the policy is good enough that
+      further gains would require transitions the world model gets wrong, more of those transitions
+      do not help.
+    </p>
+
+    <figure class="figure" style="margin-top: 1.5rem; margin-bottom: 0;">
+      <div class="figure__media figure__media--plate">
+        <img src="static/images/rawcls_sparse_dense_performance_improvement_stopped.png"
+             alt="Real held-out success for the sparse and dense dream arms over 10M imagined training steps: both rise until roughly 5M and then flatten, as shown by the piecewise linear fits.">
+      </div>
+      <figcaption class="figure__caption">
+        Real held-out success against imagined training steps for both dream arms, out to 10M
+        steps. Dashed lines are linear fits over the first and the second half of training. The
+        second-half fits are nearly flat for both reward modes.
+      </figcaption>
+    </figure>
+
+    <!-- ---- RQ: latent type ------------------------------------------------- -->
+    <h3 class="panel__title" id="latent-types" style="margin: 2.5rem 0 0.75rem;">
+      Performance by latent type
+    </h3>
+    <p>
+      LeWM's predictor works in a <i>projected</i> latent space, while the BC policy reads the raw
+      CLS token of the encoder. Both are 192-dimensional, so nothing crashes if you mix them up,
+      but they are not the same features. That leaves two options. Either keep the policy on raw
+      CLS and bridge back to it on every imagined step, which is what the dream loop above does, or
+      train the policy directly on projected latents so that what the predictor emits is already
+      what the policy reads.
+    </p>
+
+    <p>
+      We settled this at the BC stage, before any PPO run, by training the same action-chunked
+      policy on four different inputs and evaluating each one in the real environment
+      (<a href="#bc-performance">BC policy performance</a> in Results). Reading the LeWM dynamics latent
+      directly costs about 12 points of success against CLS features, before reinforcement learning
+      even starts. That is why we kept the policy on CLS features and added the inverse projector,
+      rather than taking the simpler design in which the policy reads what the predictor already
+      emits.
+    </p>
+
+    <p>
+      This part needs more analysis. It rests on a single comparison made at the BC stage over 3
+      seeds, with a seed spread wide enough that the ordering is not firm. It also does not tell us
+      whether that ordering survives PPO fine-tuning, or whether the dynamics latent is weaker in
+      itself or simply needs a different amount of training to be used well.
+    </p>
+
+    <!-- ---- RQ: OOD actions and latent drift --------------------------------- -->
+    <h3 class="panel__title" id="ood-drift" style="margin: 2.5rem 0 0.75rem;">
+      <span class="todo">FILL</span> Out-of-distribution actions accelerate latent rollout drift
+      and reduce state recoverability
+    </h3>
+    <p>
+      <span class="todo">FILL</span> Separate world-model drift from probe error and say which one
+      dominates. Suggested figures: probe false-positive rate against imagination horizon, and
+      latent drift against horizon.
+    </p>
+
+    <div class="grid grid--2" style="margin-top: 1.5rem;">
       <figure class="figure" style="margin-bottom: 0;">
         <div class="figure__media">
           <!-- FILL: probe false-positive rate vs imagination horizon -->
           <div class="media-placeholder"><code>probe_vs_horizon.png</code></div>
         </div>
         <figcaption class="figure__caption">
-          <span class="todo">FILL</span> The probe is not uniformly wrong — it is wrong with
-          depth. Note where dream episodes typically declare success on this axis.
+          <span class="todo">FILL</span> The probe is not uniformly wrong, it is wrong with depth.
+          Note where dream episodes typically declare success on this axis.
         </figcaption>
       </figure>
 
@@ -474,8 +600,8 @@
           <div class="media-placeholder"><code>latent_drift.png</code></div>
         </div>
         <figcaption class="figure__caption">
-          <span class="todo">FILL</span> Separate world-model drift from probe error, and say
-          which one dominates.
+          <span class="todo">FILL</span> How far the imagined latent has moved from the latent the
+          simulator would have produced, as a function of horizon.
         </figcaption>
       </figure>
     </div>
