@@ -415,46 +415,6 @@
      ========================================================================== -->
 <section class="section" id="analysis">
   <div class="container container--wide">
-    <h2 class="section__title">Does the world model tell the truth?</h2>
-    <p class="section__lede">
-      <span class="todo">FILL</span> Success in the dream is declared by a frozen probe reading a
-      latent no simulator ever corrects — the textbook setup for model exploitation. Three
-      measurements, one per failure mode.
-    </p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Question</th>
-            <th scope="col">Measurement</th>
-            <th scope="col" class="num">Result</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">Is imagined success optimistic?</th>
-            <td>Imagined vs real held-out success, same weights</td>
-            <td class="num"><span class="todo">—</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Does selecting on it cost anything?</th>
-            <td>Real success given up by ranking on the imagined metric</td>
-            <td class="num"><span class="todo">—</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Were the rewarded successes real?</th>
-            <td>Probe-declared successes replayed in the simulator</td>
-            <td class="num"><span class="todo">—</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="table-note" style="margin-bottom: 2rem;">
-      <span class="todo">FILL</span> How many paired measurements, how many seeds, how many
-      episodes — the sample sizes behind each row.
-    </p>
 
     <!-- ---- RQ: reward optimism gap ---------------------------------------- -->
     <h3 class="panel__title" id="optimism-gap" style="margin: 2.5rem 0 0.75rem;">
@@ -733,16 +693,6 @@ python -m scripts.download_lewm_checkpoint
 python scripts/download_pusht_data.py</pre>
     </div>
 
-    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Repository layout</h3>
-    <div class="code">
-<pre><span class="todo">FILL — trim the README tree to the paths a visitor actually needs.</span>
-
-src/representations/   frozen LeWM encoder, bridge
-src/bc/                latent behavioural cloning
-src/ppo/               real-env PPO and dream PPO
-scripts/probes/        reward and success probes
-scripts/campaign/      run scripts for every arm</pre>
-    </div>
   </div>
 </section>
 
