@@ -3,29 +3,571 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Interaction-free RL training in Latent World Model (LeWM)</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      max-width: 46rem;
-      margin: 0 auto;
-      padding: 5rem 1.5rem;
-      line-height: 1.5;
-      color: #1a1a1a;
-      background: #fff;
-    }
-    h1 {
-      font-size: 2rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin: 0;
-    }
-    @media (prefers-color-scheme: dark) {
-      body { color: #e8e8e8; background: #121212; }
-    }
-  </style>
+
+  <title>Offline Policy Improvement with LeWorldModel</title>
+  <meta name="description" content="Can a policy be improved inside a JEPA world model, without touching the environment?">
+
+  <!-- Social preview. FILL: absolute URL of the teaser image once the site is deployed. -->
+  <meta property="og:title" content="Offline Policy Improvement with LeWorldModel">
+  <meta property="og:description" content="Can a policy be improved inside a JEPA world model, without touching the environment?">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="static/images/teaser.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
-  <h1>Interaction-free RL training in Latent World Model (LeWM)</h1>
+
+<a class="skip-link" href="#abstract">Skip to content</a>
+
+<!-- ==========================================================================
+     NAV — one entry per section. Remove entries you drop; the highlight
+     wires itself up from these hrefs.
+     ========================================================================== -->
+<nav class="nav" aria-label="Section navigation">
+  <div class="container container--wide">
+    <ul class="nav__list">
+      <li><a class="nav__link" href="#abstract">Abstract</a></li>
+      <li><a class="nav__link" href="#method">Method</a></li>
+      <li><a class="nav__link" href="#results">Results</a></li>
+      <li><a class="nav__link" href="#analysis">Does it tell the truth?</a></li>
+      <li><a class="nav__link" href="#qualitative">Rollouts</a></li>
+      <li><a class="nav__link" href="#resources">Resources</a></li>
+      <li><a class="nav__link" href="#bibtex">BibTeX</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<!-- ==========================================================================
+     1. HERO — what is this?
+     ========================================================================== -->
+<header class="hero">
+  <div class="container">
+    <h1 class="hero__title">Offline Policy Improvement with LeWorldModel</h1>
+
+    <p class="hero__subtitle">
+      Can a policy be improved inside a JEPA world model, without touching the environment?
+    </p>
+
+    <p class="hero__authors">
+      <span class="hero__author"><a href="#">Emre Doruk Taşkın</a></span>,
+      <span class="hero__author"><a href="#">Yunus Emre Karaoglan</a></span>,
+      <span class="hero__author"><a href="#">Iñigo Miguel Méndez Valero</a></span>
+      <!-- FILL: personal/scholar links above, or drop the <a> and keep plain text.
+           Add <sup class="affil">1</sup> markers here if affiliations ever differ. -->
+    </p>
+
+    <p class="hero__meta">
+      <span class="label">Supervisor:</span> Akshay L Chandra
+    </p>
+
+    <p class="hero__meta">
+      Deep Learning Lab, University of Freiburg &middot; SoSe 2026
+    </p>
+
+    <!-- Button row. Set aria-disabled="true" on anything not published yet. -->
+    <div class="buttons">
+      <a class="button" href="#" aria-disabled="true">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 1.5h5L13 5.5v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Zm4.5 1.2v3.3h3.3L8.5 2.7Z"/></svg>
+        Paper
+      </a>
+      <a class="button" href="https://docs.google.com/presentation/d/1-oNcFspcV0CBroVyhtFS_ti9GM_A7fOuP8SgzajbwqY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 2h12v9H9.2l1.6 2.4-.9.6L8 11.4l-1.9 2.6-.9-.6L6.8 11H2V2Zm1.2 1.2v6.6h9.6V3.2H3.2Z"/></svg>
+        Slides
+      </a>
+      <a class="button button--github" href="https://github.com/edtaskin/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer" aria-label="View the source code on GitHub">
+        <svg class="button__brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.21.7-3.89-1.36-3.89-1.36-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.76.12 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.18c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+        GitHub
+      </a>
+      <a class="button" href="https://huggingface.co/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1 2 4v8l6 3 6-3V4L8 1Zm0 1.5 4.3 2.1L8 6.7 3.7 4.6 8 2.5ZM3.2 5.8 7.4 8v5.1l-4.2-2.1V5.8Zm5.4 7.3V8l4.2-2.2v5.2l-4.2 2.1Z"/></svg>
+        Checkpoints
+      </a>
+      <a class="button" href="https://le-wm.github.io/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1ZM2.3 8.6h2.4c.1 1.4.4 2.7.9 3.7a5.8 5.8 0 0 1-3.3-3.7Zm2.4-1.2H2.3a5.8 5.8 0 0 1 3.3-3.7c-.5 1-.8 2.3-.9 3.7Zm1.2 0c.1-1.6.5-2.9 1-3.6.3-.4.6-.6.7-.6h.2v4.2H5.9Zm0 1.2h2v4.2c-.2 0-.5-.2-.9-.6-.5-.7-.9-2-1-3.6Zm3.2 4.2V8.6h2c-.1 1.6-.5 2.9-1 3.6-.4.4-.7.6-1 .6Zm0-5.4V3.2c.3 0 .6.2 1 .6.5.7.9 2 1 3.6h-2Zm3.2 1.2h2.4a5.8 5.8 0 0 1-3.3 3.7c.5-1 .8-2.3.9-3.7Zm0-1.2c-.1-1.4-.4-2.7-.9-3.7a5.8 5.8 0 0 1 3.3 3.7h-2.4Z"/></svg>
+        LeWM
+      </a>
+    </div>
+  </div>
+</header>
+
+
+<!-- ==========================================================================
+     2. TEASER — show me. One autoplaying loop, the single best visual.
+     ========================================================================== -->
+<section class="section" style="padding-top: 1rem; border-top: none;">
+  <div class="container container--wide">
+    <figure class="figure">
+      <div class="figure__media">
+        <!-- FILL: swap the placeholder for the real loop.
+        <video autoplay muted loop playsinline poster="static/images/teaser.png">
+          <source src="static/videos/teaser.mp4" type="video/mp4">
+        </video>
+        -->
+        <div class="media-placeholder">
+          <span>Teaser loop</span>
+          <code>static/videos/teaser.mp4</code>
+          <span>Suggested: dream rollout beside the same chunks replayed in the simulator.</span>
+        </div>
+      </div>
+      <figcaption class="figure__caption">
+        <span class="todo">FILL</span> One or two sentences that make the loop legible without
+        the reader having scrolled anywhere else — what is on the left, what is on the right,
+        and what they should notice.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     3. ABSTRACT / TL;DR — why should I care?
+     ========================================================================== -->
+<section class="section" id="abstract">
+  <div class="container">
+    <h2 class="section__title">Abstract</h2>
+
+    <p>
+      <span class="todo">FILL — ~120 words, tightened from the README summary.</span>
+      LeWorldModel is a joint-embedding predictive architecture that learns PushT dynamics in a
+      192-d latent space from pixels. If those dynamics are good enough, everything an RL agent
+      needs — states, transitions, rewards, termination — can be produced inside the model, and
+      policy improvement becomes an offline procedure.
+    </p>
+
+    <p>
+      <span class="todo">FILL</span> Second paragraph: what you built, what it scores, and the
+      catch. End on the finding that makes the page worth reading rather than on the headline
+      number.
+    </p>
+
+    <!-- Headline numbers. Delete this block if the abstract carries them well enough alone. -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__label">Dream PPO success, real task</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value">0</div>
+        <div class="stat__label">Environment transitions consumed</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__label">Optimism gap, imagined vs real</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__label">Rewarded successes that never happened</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     4. METHOD — how does it work? Three panels, 2–3 sentences each.
+     ========================================================================== -->
+<section class="section" id="method">
+  <div class="container container--wide">
+    <h2 class="section__title">Method</h2>
+    <p class="section__lede">
+      <span class="todo">FILL</span> One sentence framing the three stages — everything
+      downstream of the encoder is frozen-encoder work.
+    </p>
+
+    <!-- Optional: full pipeline diagram above the panels.
+    <figure class="figure">
+      <div class="figure__media"><img src="static/images/method_diagram.png" alt="Pipeline diagram"></div>
+      <figcaption class="figure__caption">FILL</figcaption>
+    </figure>
+    -->
+
+    <div class="grid grid--3">
+      <article class="panel">
+        <div class="panel__step">Step 1</div>
+        <h3 class="panel__title">Latent BC prior</h3>
+        <div class="panel__figure">
+          <!-- FILL: <img src="static/images/approach_1_bc_init.svg" alt="…"> -->
+          <div class="media-placeholder media-placeholder--square"><code>approach_1_bc_init.svg</code></div>
+        </div>
+        <p class="panel__body">
+          <span class="todo">FILL</span> 2–3 sentences: action-chunked behavioural cloning on the
+          frozen LeWM encoder, and why every PPO arm starts from the same prior.
+        </p>
+      </article>
+
+      <article class="panel">
+        <div class="panel__step">Step 2</div>
+        <h3 class="panel__title">Probes &amp; bridge</h3>
+        <div class="panel__figure">
+          <!-- FILL: <img src="static/images/approach_2_reward_heads.svg" alt="…"> -->
+          <div class="media-placeholder media-placeholder--square"><code>approach_2_reward_heads.svg</code></div>
+        </div>
+        <p class="panel__body">
+          <span class="todo">FILL</span> 2–3 sentences: frozen probes supply reward and
+          termination; the bridge maps predicted latents back into the policy's input space.
+        </p>
+      </article>
+
+      <article class="panel">
+        <div class="panel__step">Step 3</div>
+        <h3 class="panel__title">Dream loop</h3>
+        <div class="panel__figure">
+          <!-- FILL: <img src="static/images/approach_3_dream_loop.svg" alt="…"> -->
+          <div class="media-placeholder media-placeholder--square"><code>approach_3_dream_loop.svg</code></div>
+        </div>
+        <p class="panel__body">
+          <span class="todo">FILL</span> 2–3 sentences: chunk-level PPO rolled out through the
+          predictor, one PPO transition = one predictor step = 5 env steps, <code>env.step</code>
+          never called.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     5. RESULTS — does it work? Main table + budget curve.
+     ========================================================================== -->
+<section class="section" id="results">
+  <div class="container container--wide">
+    <h2 class="section__title">Results</h2>
+    <p class="section__lede">
+      <span class="todo">FILL</span> State the evaluation protocol in one sentence: episode count,
+      seeds, which checkpoint, and what "success" means.
+    </p>
+
+    <!-- FILL: values below are placeholders on purpose — the README numbers predate the
+         seed-sampling correction. Regenerate before publishing. -->
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Success rate by agent and reward type</caption>
+        <thead>
+          <tr>
+            <th scope="col">Agent</th>
+            <th scope="col">Reward</th>
+            <th scope="col" class="num">Env steps</th>
+            <th scope="col" class="num">Success (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">BC prior</th>
+            <td>—</td>
+            <td class="num">0</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">PPO — real env</th>
+            <td>sparse</td>
+            <td class="num">1M</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">PPO — real env</th>
+            <td>dense (block-pose shaping)</td>
+            <td class="num">1M</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">PPO — in LeWM</th>
+            <td>sparse (probe-declared success)</td>
+            <td class="num"><b>0</b></td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">PPO — in LeWM</th>
+            <td>dense (time-to-success classifier)</td>
+            <td class="num"><b>0</b></td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="table-note">
+      <span class="todo">FILL</span> Caveat line — e.g. that the reward axis is not symmetric,
+      so the dense column is two shaping schemes rather than one comparison.
+    </p>
+
+    <figure class="figure" style="margin-top: 2rem;">
+      <div class="figure__media">
+        <!-- FILL: <img src="static/images/budget_curve.png" alt="Success vs environment-step budget"> -->
+        <div class="media-placeholder">
+          <span>Budget curve</span>
+          <code>static/images/budget_curve.png</code>
+        </div>
+      </div>
+      <figcaption class="figure__caption">
+        <span class="todo">FILL</span> Success against environment-step budget. Say what the
+        x-axis costs and where the dream arm sits on it.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     6. ANALYSIS — where does it break?
+     ========================================================================== -->
+<section class="section" id="analysis">
+  <div class="container container--wide">
+    <h2 class="section__title">Does the world model tell the truth?</h2>
+    <p class="section__lede">
+      <span class="todo">FILL</span> Success in the dream is declared by a frozen probe reading a
+      latent no simulator ever corrects — the textbook setup for model exploitation. Three
+      measurements, one per failure mode.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Question</th>
+            <th scope="col">Measurement</th>
+            <th scope="col" class="num">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Is imagined success optimistic?</th>
+            <td>Imagined vs real held-out success, same weights</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Does selecting on it cost anything?</th>
+            <td>Real success given up by ranking on the imagined metric</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Were the rewarded successes real?</th>
+            <td>Probe-declared successes replayed in the simulator</td>
+            <td class="num"><span class="todo">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="table-note" style="margin-bottom: 2rem;">
+      <span class="todo">FILL</span> How many paired measurements, how many seeds, how many
+      episodes — the sample sizes behind each row.
+    </p>
+
+    <div class="grid grid--2">
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media">
+          <!-- FILL: probe false-positive rate vs imagination horizon -->
+          <div class="media-placeholder"><code>probe_vs_horizon.png</code></div>
+        </div>
+        <figcaption class="figure__caption">
+          <span class="todo">FILL</span> The probe is not uniformly wrong — it is wrong with
+          depth. Note where dream episodes typically declare success on this axis.
+        </figcaption>
+      </figure>
+
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media">
+          <!-- FILL: latent drift vs horizon, or imagined-vs-real scatter -->
+          <div class="media-placeholder"><code>latent_drift.png</code></div>
+        </div>
+        <figcaption class="figure__caption">
+          <span class="todo">FILL</span> Separate world-model drift from probe error, and say
+          which one dominates.
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="callout" style="margin-top: 2rem; margin-bottom: 0;">
+      <div class="callout__title">Caveat</div>
+      <p>
+        <span class="todo">FILL</span> The honest limitation — e.g. the shared BC prior was
+        itself picked by real-env success, so a dream run started from it is not
+        interaction-free end to end.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     7. QUALITATIVE — show me again, honestly. Successes and failures.
+     ========================================================================== -->
+<section class="section" id="qualitative">
+  <div class="container container--wide">
+    <h2 class="section__title">Rollouts</h2>
+    <p class="section__lede">
+      <span class="todo">FILL</span> What is being shown and how it was produced — open-loop chunk
+      execution from held-out start states, imagined frames beside simulator frames.
+    </p>
+
+    <h3 class="panel__title" style="margin-bottom: 1rem;">Successes</h3>
+    <div class="grid grid--3" style="margin-bottom: 2.5rem;">
+      <!-- FILL: duplicate this figure per clip.
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media">
+          <video autoplay muted loop playsinline poster="static/images/rollout_01.png">
+            <source src="static/videos/rollout_01.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption class="figure__caption">Caption.</figcaption>
+      </figure>
+      -->
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>rollout_01.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>rollout_02.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>rollout_03.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+    </div>
+
+    <h3 class="panel__title" style="margin-bottom: 0.5rem;">Failures</h3>
+    <p class="section__lede">
+      <span class="todo">FILL</span> Ideally: a hallucinated success — the probe declares the
+      episode solved while the replayed chunks show it was not.
+    </p>
+    <div class="grid grid--3">
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>failure_01.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>failure_02.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+      <figure class="figure" style="margin-bottom:0;">
+        <div class="figure__media"><div class="media-placeholder media-placeholder--square"><code>failure_03.mp4</code></div></div>
+        <figcaption class="figure__caption"><span class="todo">FILL</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     8. RESOURCES — how do I use it?
+     ========================================================================== -->
+<section class="section" id="resources">
+  <div class="container container--wide">
+    <h2 class="section__title">Resources</h2>
+
+    <h3 class="panel__title" style="margin: 1.5rem 0 1rem;">Checkpoints</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Artifact</th>
+            <th scope="col">What it is</th>
+            <th scope="col">Hub path</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><span class="todo">FILL</span></th>
+            <td>BC prior, raw CLS</td>
+            <td><code>hf://offline-rl-with-le-wm/…</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="todo">FILL</span></th>
+            <td>PPO — real env, sparse</td>
+            <td><code>hf://offline-rl-with-le-wm/…</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="todo">FILL</span></th>
+            <td>PPO — in LeWM, sparse</td>
+            <td><code>hf://offline-rl-with-le-wm/…</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="todo">FILL</span></th>
+            <td>Probes (reward, success)</td>
+            <td><code>hf://offline-rl-with-le-wm/…</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Install</h3>
+    <div class="code">
+<pre>git clone https://github.com/edtaskin/offline-rl-with-le-wm
+cd offline-rl-with-le-wm
+
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt          # requirements-macos.txt on Apple silicon
+cp .env.example .env                     # LE_WM_PATH, WANDB_API_KEY, HF_TOKEN
+
+python -m scripts.download_lewm_checkpoint
+python scripts/download_pusht_data.py</pre>
+    </div>
+
+    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Repository layout</h3>
+    <div class="code">
+<pre><span class="todo">FILL — trim the README tree to the paths a visitor actually needs.</span>
+
+src/representations/   frozen LeWM encoder, bridge
+src/bc/                latent behavioural cloning
+src/ppo/               real-env PPO and dream PPO
+scripts/probes/        reward and success probes
+scripts/campaign/      run scripts for every arm</pre>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     9. BIBTEX + ACKNOWLEDGEMENTS — how do I cite it?
+     ========================================================================== -->
+<section class="section" id="bibtex">
+  <div class="container container--wide">
+    <h2 class="section__title">BibTeX</h2>
+    <div class="code">
+<pre>@misc{taskin2026offlinelewm,
+  title   = {Offline Policy Improvement with LeWorldModel},
+  author  = {Ta{\c{s}}k{\i}n, Emre Doruk and Karaoglan, Yunus Emre and
+             M{\'e}ndez Valero, I{\~n}igo Miguel},
+  year    = {2026},
+  howpublished = {\url{<span class="todo">FILL — page URL</span>}},
+  note    = {Deep Learning Lab, University of Freiburg}
+}</pre>
+    </div>
+
+    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Acknowledgements</h3>
+    <p>
+      <span class="todo">FILL</span> Credit
+      <a href="https://github.com/lucas-maes/le-wm">LeWM</a>, stable-worldmodel, and
+      Diffusion Policy, plus anyone who provided compute or supervision. Say what each one
+      contributed rather than listing names alone.
+    </p>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <nav class="footer__resources" aria-label="Project links">
+      <a class="footer__resource footer__resource--github" href="https://github.com/edtaskin/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" title="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.21.7-3.89-1.36-3.89-1.36-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.76.12 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.18c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+      </a>
+      <a class="footer__resource" href="https://huggingface.co/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer" aria-label="Model checkpoints on Hugging Face" title="Model checkpoints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m12 2.8-8 4.1v10.2l8 4.1 8-4.1V6.9l-8-4.1Z"/><path d="m4 6.9 8 4.2 8-4.2M12 11.1v10.1"/></svg>
+      </a>
+      <a class="footer__resource" href="https://le-wm.github.io/" target="_blank" rel="noopener noreferrer" aria-label="LeWorldModel project page" title="LeWorldModel project">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.46 3.32 5.46 3.32 9S14.2 18.54 12 21c-2.2-2.46-3.32-5.46-3.32-9S9.8 5.46 12 3Z"/></svg>
+      </a>
+    </nav>
+    <p>
+      Page source available under
+      <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+    </p>
+  </div>
+</footer>
+
+<script src="static/js/main.js"></script>
 </body>
 </html>
