@@ -135,11 +135,11 @@
         <div class="stat__label">Additional environment transitions consumed</div>
       </div>
       <div class="stat">
-        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__value">+27.5 pp</div>
         <div class="stat__label">Optimism gap, imagined vs real</div>
       </div>
       <div class="stat">
-        <div class="stat__value"><span class="todo">—</span></div>
+        <div class="stat__value">52.9%</div>
         <div class="stat__label">Rewarded successes that never happened</div>
       </div>
     </div>
@@ -257,76 +257,155 @@
   <div class="container container--wide">
     <h2 class="section__title">Results</h2>
     <p class="section__lede">
-      <span class="todo">FILL</span> State the evaluation protocol in one sentence: episode count,
-      seeds, which checkpoint, and what "success" means.
+      Each <code>best.pt</code> checkpoint from training seeds 1&ndash;3 is evaluated on the same
+      150 real-environment episodes sampled from master seed 42; success means placing the block
+      within 20 px and 20&deg; of the fixed target within 300 environment steps, and results are
+      reported as the mean &plusmn; standard deviation across seeds.
     </p>
 
-    <!-- FILL: values below are placeholders on purpose — the README numbers predate the
-         seed-sampling correction. Regenerate before publishing. -->
+    <h3 class="panel__title" id="bc-performance" style="margin: 1.5rem 0 0.75rem;">BC policy performance</h3>
+    <p style="margin-bottom: 1rem;">
+      The same action-chunked BC policy, trained on four different inputs and evaluated in the real
+      environment. This is what decided which representation the rest of the project is built on.
+    </p>
+
     <div class="table-wrap">
       <table>
-        <caption class="visually-hidden">Success rate by agent and reward type</caption>
+        <caption class="visually-hidden">BC policy success rate by policy input</caption>
         <thead>
           <tr>
-            <th scope="col">Agent</th>
-            <th scope="col">Reward</th>
-            <th scope="col" class="num">Env steps</th>
+            <th scope="col">Policy input</th>
             <th scope="col" class="num">Success (%)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th scope="row">BC prior</th>
-            <td>—</td>
-            <td class="num">0</td>
-            <td class="num"><span class="todo">—</span></td>
+            <th scope="row">State vector</th>
+            <td class="num">60.7 &plusmn; 4.2</td>
           </tr>
           <tr>
-            <th scope="row">PPO — real env</th>
-            <td>sparse</td>
-            <td class="num">1M</td>
-            <td class="num"><span class="todo">—</span></td>
+            <th scope="row">CNN</th>
+            <td class="num">44.2 &plusmn; 17.1</td>
           </tr>
           <tr>
-            <th scope="row">PPO — real env</th>
-            <td>dense (block-pose shaping)</td>
-            <td class="num">1M</td>
-            <td class="num"><span class="todo">—</span></td>
+            <th scope="row"><b>CLS features</b></th>
+            <td class="num"><b>56.0 &plusmn; 7.7</b></td>
           </tr>
           <tr>
-            <th scope="row">PPO — in LeWM</th>
-            <td>sparse (probe-declared success)</td>
-            <td class="num"><b>0</b></td>
-            <td class="num"><span class="todo">—</span></td>
-          </tr>
-          <tr>
-            <th scope="row">PPO — in LeWM</th>
-            <td>dense (time-to-success classifier)</td>
-            <td class="num"><b>0</b></td>
-            <td class="num"><span class="todo">—</span></td>
+            <th scope="row">LeWM dynamics latent</th>
+            <td class="num">43.6 &plusmn; 6.2</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <p class="table-note">
-      <span class="todo">FILL</span> Caveat line — e.g. that the reward axis is not symmetric,
-      so the dense column is two shaping schemes rather than one comparison.
+      Mean and standard deviation over 3 seeds. The state vector is privileged information that
+      does not come from pixels, so it is a reference point rather than a competing method.
+      CLS features are the strongest visual input, and they are what every PPO run below starts
+      from. See <a href="#latent-types">Performance by latent type</a> for what this cost.
     </p>
 
-    <figure class="figure" style="margin-top: 2rem;">
-      <div class="figure__media">
-        <!-- FILL: <img src="static/images/budget_curve.png" alt="Success vs environment-step budget"> -->
-        <div class="media-placeholder">
-          <span>Budget curve</span>
-          <code>static/images/budget_curve.png</code>
-        </div>
+    <h3 class="panel__title" style="margin: 2.5rem 0 0.75rem;">Policy performance after PPO</h3>
+
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Policy performance after PPO fine-tuning</caption>
+        <thead>
+          <tr>
+            <th scope="col">Method</th>
+            <th scope="col">Reward</th>
+            <th scope="col" class="num">Success rate (%)</th>
+            <th scope="col" class="num">Real env. steps</th>
+            <th scope="col" class="num">Rel. improvement (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Env-PPO</th>
+            <td>Dense</td>
+            <td class="num">73.8 &plusmn; 5.7</td>
+            <td class="num">1M</td>
+            <td class="num">31.8</td>
+          </tr>
+          <tr>
+            <th scope="row">Env-PPO</th>
+            <td>Sparse</td>
+            <td class="num">74.4 &plusmn; 8.3</td>
+            <td class="num">1M</td>
+            <td class="num">32.9</td>
+          </tr>
+          <tr>
+            <th scope="row"><b>Dream-PPO</b></th>
+            <td><b>Dense</b></td>
+            <td class="num"><b>77.6 &plusmn; 1.9</b></td>
+            <td class="num"><b>0</b></td>
+            <td class="num"><b>38.6</b></td>
+          </tr>
+          <tr>
+            <th scope="row">Dream-PPO</th>
+            <td>Sparse</td>
+            <td class="num">72.9 &plusmn; 2.6</td>
+            <td class="num">0</td>
+            <td class="num">30.2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="table-note">
+      Mean &plusmn; std. over 3 seeds; initialized from the CLS BC policy.
+    </p>
+
+    <p class="table-note">
+      The reward labels are not symmetric across methods. Env-PPO receives rewards from the
+      simulator, while Dream-PPO receives probe-predicted success and learned dense shaping from
+      imagined latents. The dense rows therefore compare two shaping schemes, not an identical
+      reward function in two environments.
+    </p>
+
+    <p style="margin-top: 2rem;">
+      The budget curves ask how much real interaction Env-PPO needs to match a Dream-PPO policy
+      trained entirely in LeWM. The bold orange curve is the mean over three Env-PPO seeds and the
+      thin curves show the individual seeds. Dream-PPO is the blue zero-interaction reference; its
+      band shows the reported uncertainty. The horizontal axis counts both training interaction
+      and the real-environment evaluations used for checkpoint selection.
+    </p>
+
+    <figure class="figure" style="margin-top: 1.5rem;">
+      <div class="figure__media figure__media--plate">
+        <img src="static/images/rq1_budget_curve_sparse.png"
+             alt="Sparse-reward interaction-budget curve. Dream-PPO reaches 76.0 percent success with zero real-environment interaction, while the mean Env-PPO curve rises from about 44 percent and first reaches that level after about 1.22 million real-environment steps.">
       </div>
       <figcaption class="figure__caption">
-        <span class="todo">FILL</span> Success against environment-step budget. Say what the
-        x-axis costs and where the dream arm sits on it.
+        <b>Sparse reward.</b> Dream-PPO reaches 76.0% &plusmn; 4.3% after 5M imagined steps while
+        consuming no real-environment steps. Env-PPO improves steadily from about 44% and first
+        matches that mean at approximately 1.22M real steps. In this setting, imagination provides
+        roughly the performance of a mature interactive policy without paying its interaction
+        cost.
       </figcaption>
     </figure>
+
+    <figure class="figure">
+      <div class="figure__media figure__media--plate">
+        <img src="static/images/rq1_budget_curve_dense.png"
+             alt="Dense-reward interaction-budget curve. Dream-PPO reaches 78.7 percent success with zero real-environment interaction, while the noisier mean Env-PPO curve starts near 42 percent and first exceeds that level after about 1.28 million real-environment steps.">
+      </div>
+      <figcaption class="figure__caption">
+        <b>Dense reward.</b> Dream-PPO reaches 78.7% &plusmn; 2.3% after 10M imagined steps at zero
+        interaction. Env-PPO is noisier across seeds, but its mean climbs from about 42% and first
+        exceeds the dream reference at approximately 1.28M real steps. Dense shaping therefore
+        changes the learning trajectory, but not the central result: matching the world-model
+        policy requires well over a million real-environment steps.
+      </figcaption>
+    </figure>
+
+    <p class="table-note">
+      The sparse curve uses 150-episode evaluations from master seed 42, whereas the dense curve
+      uses 50-episode evaluations at seed 0. Interpret the crossing within each panel; the two
+      absolute success levels are not a controlled sparse-versus-dense comparison.
+    </p>
+
   </div>
 </section>
 
