@@ -70,10 +70,6 @@
 
     <!-- Button row. Set aria-disabled="true" on anything not published yet. -->
     <div class="buttons">
-      <a class="button" href="#" aria-disabled="true">
-        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 1.5h5L13 5.5v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Zm4.5 1.2v3.3h3.3L8.5 2.7Z"/></svg>
-        Paper
-      </a>
       <a class="button button--github" href="https://github.com/edtaskin/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer" aria-label="View the source code on GitHub">
         <svg class="button__brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.21.7-3.89-1.36-3.89-1.36-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.76.12 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.18c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
         GitHub
@@ -190,8 +186,20 @@
           <div class="media-placeholder media-placeholder--square"><code>approach_1_bc_init.svg</code></div>
         </div>
         <p class="panel__body">
-          <span class="todo">FILL</span> 2–3 sentences: action-chunked behavioural cloning on the
-          frozen LeWM encoder, and why every PPO arm starts from the same prior.
+          <span class="todo">FILL</span> How the BC policy and its variants are trained —
+          action-chunked behavioural cloning on the frozen LeWM encoder, what the variants change,
+          and which one becomes the prior.
+        </p>
+
+        <p class="panel__body">
+          The BC network is not thrown away when PPO starts. It becomes the PPO actor: its weights
+          are loaded into the actor's action-chunk head, a learned log-std (one value per action,
+          not predicted from the state) turns the fixed chunk into a Gaussian policy, and a new
+          value head reads the same stacked latents. The encoder stays frozen the whole time.
+          Every PPO run in the results table starts from the same BC checkpoint. We do this on
+          purpose: the runs should differ only in where their training experience comes from (real
+          environment or imagination, sparse or dense reward). With one shared starting policy, a
+          difference in the table cannot be explained by one run simply having a better prior.
         </p>
       </article>
 
@@ -203,8 +211,16 @@
           <div class="media-placeholder media-placeholder--square"><code>approach_2_reward_heads.svg</code></div>
         </div>
         <p class="panel__body">
-          <span class="todo">FILL</span> 2–3 sentences: frozen probes supply reward and
-          termination; the bridge maps predicted latents back into the policy's input space.
+          <span class="todo">FILL</span> How the reward probes are trained, for both reward modes:
+          the sparse one (probe-declared success, which also ends the episode) and the dense one
+          (time-to-success classifier). What each probe reads, what it is trained on, and how well
+          it fits.
+        </p>
+
+        <p class="panel__body">
+          <span class="todo">FILL</span> How the inverse projector is trained, i.e. the map that
+          takes LeWM's predicted latent back to the raw CLS space the policy reads. For why we
+          train one at all, see <a href="#analysis">Performance by latent type</a> below.
         </p>
       </article>
 
@@ -216,9 +232,29 @@
           <div class="media-placeholder media-placeholder--square"><code>approach_3_dream_loop.svg</code></div>
         </div>
         <p class="panel__body">
-          <span class="todo">FILL</span> 2–3 sentences: chunk-level PPO rolled out through the
-          predictor, one PPO transition = one predictor step = 5 env steps, <code>env.step</code>
-          never called.
+          In the real loop, PPO trains on the simulator. One PPO step is one open-loop action chunk
+          of 5 environment steps: the agent reads a stack of 3 encoded frames, outputs the chunk,
+          and the environment itself returns the reward, the success flag and the end of the
+          episode. Nothing has to be predicted here, so this arm needs no reward probes and no
+          bridge. We still need the expert dataset for two reasons: the policy PPO starts from is
+          the BC prior trained on it, and the dataset also fixes the conventions PPO has to follow,
+          since the action normalisation and the observation contract (frame stack 3, stride 5,
+          chunk size 5) are read from the BC stats file. PPO therefore keeps working in exactly the
+          space BC was trained in.
+        </p>
+
+        <p class="panel__body">
+          The dream loop replaces the simulator with LeWM, and <code>env.step</code> is never
+          called. An episode starts from a short window of real frames taken from held-out expert
+          episodes, and everything after that is imagined: the agent picks an action chunk, and
+          LeWM's predictor turns the current latent plus that chunk into the next latent. One
+          predictor step covers 5 environment steps, so it matches one action chunk exactly. The
+          inverse projector then maps the predicted latent back into the raw CLS space the policy
+          reads, so the next observation looks like the ones the agent was trained on, and the
+          probes read the imagined latent to do the simulator's old job: the sparse probe declares
+          success and ends the episode, the dense one adds shaping on top. Episodes that never
+          succeed are cut off after a fixed number of predictor steps, just like a time limit in
+          the real loop.
         </p>
       </article>
     </div>
