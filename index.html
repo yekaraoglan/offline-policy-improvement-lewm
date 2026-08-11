@@ -710,68 +710,8 @@
   </div>
 </section>
 
-
 <!-- ==========================================================================
-     9. RESOURCES — how do I use it?
-     ========================================================================== -->
-<section class="section" id="resources">
-  <div class="container container--wide">
-    <h2 class="section__title">Resources</h2>
-
-    <h3 class="panel__title" style="margin: 1.5rem 0 1rem;">Checkpoints</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Artifact</th>
-            <th scope="col">What it is</th>
-            <th scope="col">Hub path</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row"><span class="todo">FILL</span></th>
-            <td>BC prior, raw CLS</td>
-            <td><code>hf://offline-rl-with-le-wm/…</code></td>
-          </tr>
-          <tr>
-            <th scope="row"><span class="todo">FILL</span></th>
-            <td>PPO — real env, sparse</td>
-            <td><code>hf://offline-rl-with-le-wm/…</code></td>
-          </tr>
-          <tr>
-            <th scope="row"><span class="todo">FILL</span></th>
-            <td>PPO — in LeWM, sparse</td>
-            <td><code>hf://offline-rl-with-le-wm/…</code></td>
-          </tr>
-          <tr>
-            <th scope="row"><span class="todo">FILL</span></th>
-            <td>Probes (reward, success)</td>
-            <td><code>hf://offline-rl-with-le-wm/…</code></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Install</h3>
-    <div class="code">
-<pre>git clone https://github.com/edtaskin/offline-rl-with-le-wm
-cd offline-rl-with-le-wm
-
-python -m venv .venv &amp;&amp; source .venv/bin/activate
-pip install -r requirements.txt          # requirements-macos.txt on Apple silicon
-cp .env.example .env                     # LE_WM_PATH, WANDB_API_KEY, HF_TOKEN
-
-python -m scripts.download_lewm_checkpoint
-python scripts/download_pusht_data.py</pre>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ==========================================================================
-     10. ACKNOWLEDGEMENTS — who made this possible?
+     9. ACKNOWLEDGEMENTS — who made this possible?
      ========================================================================== -->
 <section class="section" id="acknowledgements">
   <div class="container container--wide">
