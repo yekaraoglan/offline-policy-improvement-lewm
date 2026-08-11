@@ -7,11 +7,13 @@
   <title>Offline Policy Improvement with LeWorldModel</title>
   <meta name="description" content="Can a policy be improved inside a JEPA world model, without touching the environment?">
 
-  <!-- Social preview. FILL: absolute URL of the teaser image once the site is deployed. -->
+  <!-- Social preview. og:image must stay an absolute URL — relative paths do not
+       resolve in link unfurls. Drops into place once teaser.png exists. -->
   <meta property="og:title" content="Offline Policy Improvement with LeWorldModel">
   <meta property="og:description" content="Can a policy be improved inside a JEPA world model, without touching the environment?">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="static/images/teaser.png">
+  <meta property="og:url" content="https://yekaraoglan.github.io/offline-policy-improvement-lewm/">
+  <meta property="og:image" content="https://yekaraoglan.github.io/offline-policy-improvement-lewm/static/images/teaser.png">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="stylesheet" href="static/css/style.css">
@@ -33,7 +35,7 @@
       <li><a class="nav__link" href="#analysis">Does it tell the truth?</a></li>
       <li><a class="nav__link" href="#qualitative">Rollouts</a></li>
       <li><a class="nav__link" href="#resources">Resources</a></li>
-      <li><a class="nav__link" href="#bibtex">BibTeX</a></li>
+      <li><a class="nav__link" href="#acknowledgements">Acknowledgements</a></li>
     </ul>
   </div>
 </nav>
@@ -71,10 +73,6 @@
       <a class="button" href="#" aria-disabled="true">
         <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 1.5h5L13 5.5v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Zm4.5 1.2v3.3h3.3L8.5 2.7Z"/></svg>
         Paper
-      </a>
-      <a class="button" href="https://docs.google.com/presentation/d/1-oNcFspcV0CBroVyhtFS_ti9GM_A7fOuP8SgzajbwqY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 2h12v9H9.2l1.6 2.4-.9.6L8 11.4l-1.9 2.6-.9-.6L6.8 11H2V2Zm1.2 1.2v6.6h9.6V3.2H3.2Z"/></svg>
-        Slides
       </a>
       <a class="button button--github" href="https://github.com/edtaskin/offline-rl-with-le-wm" target="_blank" rel="noopener noreferrer" aria-label="View the source code on GitHub">
         <svg class="button__brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.21.7-3.89-1.36-3.89-1.36-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.76.12 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.18c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
@@ -521,23 +519,11 @@ scripts/campaign/      run scripts for every arm</pre>
 
 
 <!-- ==========================================================================
-     9. BIBTEX + ACKNOWLEDGEMENTS — how do I cite it?
+     9. ACKNOWLEDGEMENTS — who made this possible?
      ========================================================================== -->
-<section class="section" id="bibtex">
+<section class="section" id="acknowledgements">
   <div class="container container--wide">
-    <h2 class="section__title">BibTeX</h2>
-    <div class="code">
-<pre>@misc{taskin2026offlinelewm,
-  title   = {Offline Policy Improvement with LeWorldModel},
-  author  = {Ta{\c{s}}k{\i}n, Emre Doruk and Karaoglan, Yunus Emre and
-             M{\'e}ndez Valero, I{\~n}igo Miguel},
-  year    = {2026},
-  howpublished = {\url{<span class="todo">FILL — page URL</span>}},
-  note    = {Deep Learning Lab, University of Freiburg}
-}</pre>
-    </div>
-
-    <h3 class="panel__title" style="margin: 2rem 0 1rem;">Acknowledgements</h3>
+    <h2 class="section__title">Acknowledgements</h2>
     <p>
       <span class="todo">FILL</span> Credit
       <a href="https://github.com/lucas-maes/le-wm">LeWM</a>, stable-worldmodel, and

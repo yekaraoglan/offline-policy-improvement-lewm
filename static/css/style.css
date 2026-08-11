@@ -238,6 +238,16 @@ code {
 }
 
 .hero__author { white-space: nowrap; }
+.hero__author a {
+  color: var(--text);
+  text-decoration-color: var(--border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+.hero__author a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
 
 .hero__meta {
   margin: 0.75rem 0 0;
