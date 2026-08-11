@@ -327,7 +327,12 @@ sup.affil {
 }
 
 .figure__media img,
-.figure__media video { width: 100%; }
+.figure__media video { width: 100%; display: block; }
+
+/* Diagrams and plots ship with their own light background; give them a white
+   plate so they do not glow against the dark theme. */
+.figure__media--plate,
+.panel__figure--plate { background: #fff; }
 
 .figure__caption {
   margin-top: 0.75rem;
@@ -403,6 +408,8 @@ sup.affil {
   border-radius: var(--radius);
   overflow: hidden;
 }
+
+.panel__figure img { width: 100%; display: block; }
 
 .panel__body {
   font-size: 0.9375rem;
