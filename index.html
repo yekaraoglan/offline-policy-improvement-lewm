@@ -17,6 +17,7 @@
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="stylesheet" href="static/css/style.css">
+   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -235,20 +236,13 @@
                alt="Expert frames go through the frozen vision encoder to an image feature, which the BC policy turns into 5-action chunks; its weights are later copied into the PPO actor-critic.">
         </div>
         <p class="panel__body">
-          <span class="todo">FILL</span> How the BC policy and its variants are trained —
-          action-chunked behavioural cloning on the frozen LeWM encoder, what the variants change,
-          and which one becomes the prior.
+          We first train an action-chunked Behavioral Cloning (BC) policy on expert demonstrations while keeping the LeWM encoder frozen. Rather than acting from a single observation, the policy conditions on a stack of temporally spaced frames, with frame stride controlling the temporal spacing between observations, and predicts a chunk of future actions at each decision step. This gives the policy short-term temporal context while reducing the effective decision frequency. We compare two representations for these stacked observations: LeWM dynamics latents, which are directly predicted by the world model, and the encoder's raw CLS features, taken before projection into LeWM's dynamics space.
+          Raw CLS features produce the stronger visual BC policy: 56.0 ± 7.7% success compared with 43.6 ± 6.2% for direct LeWM latents. We therefore use the Raw-CLS BC checkpoint as the common prior for all PPO experiments.
+          This choice creates a small mismatch during imagined training: LeWM rolls the environment forward in its dynamics latent space, while the policy expects raw CLS features. We bridge the two with a learned inverse projector, trained offline to map predicted LeWM dynamics latents back into the policy’s CLS representation. This lets Dream-PPO exploit LeWM’s learned dynamics without forcing the policy itself to operate on the weaker dynamics-latent representation.
         </p>
 
         <p class="panel__body">
-          The BC network is not thrown away when PPO starts. It becomes the PPO actor: its weights
-          are loaded into the actor's action-chunk head, a learned log-std (one value per action,
-          not predicted from the state) turns the fixed chunk into a Gaussian policy, and a new
-          value head reads the same stacked latents. The encoder stays frozen the whole time.
-          Every PPO run in the results table starts from the same BC checkpoint. We do this on
-          purpose: the runs should differ only in where their training experience comes from (real
-          environment or imagination, sparse or dense reward). With one shared starting policy, a
-          difference in the table cannot be explained by one run simply having a better prior.
+          The BC policy is not discarded when PPO begins. Its action-chunk network initializes the PPO actor, with a learned state-independent log-standard-deviation turning its deterministic action predictions into a Gaussian policy; a new value head is added on top of the same stacked representations. The encoder remains frozen throughout. Every Env-PPO and Dream-PPO run starts from the same BC checkpoint, so comparisons differ only in the source of training experience—real environment versus LeWM imagination—and the reward formulation, rather than in the quality of the initial policy.
         </p>
       </article>
 
@@ -267,9 +261,19 @@
         </p>
 
         <p class="panel__body">
-          <span class="todo">FILL</span> How the inverse projector is trained, i.e. the map that
-          takes LeWM's predicted latent back to the raw CLS space the policy reads. For why we
-          train one at all, see <a href="#latent-types">Performance by latent type</a> below.
+           The deprojector is trained offline using the expert trajectories to map LeWM's projected dynamics latent back to the
+          raw ViT CLS representation:
+          \[
+          g:\mathbb{R}^{192}_{\text{projected}}\rightarrow\mathbb{R}^{192}_{\text{CLS}}
+          \]
+          It uses two objectives:
+          \[
+          \mathcal{L} =
+          \underbrace{\lVert g(P(c))-c\rVert_2^2}_{\text{supervised inversion}}
+          +
+          \lambda\underbrace{\lVert P(g(z))-z\rVert_2^2}_{\text{cycle consistency}}
+          \]
+          For why we train one at all, see <a href="#latent-types">Performance by latent type</a> below.
         </p>
       </article>
 
