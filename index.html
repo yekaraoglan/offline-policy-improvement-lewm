@@ -755,18 +755,18 @@
       </figcaption>
     </figure>
 
-    <div class="grid grid--2" style="margin-top: 1.5rem;">
-      <figure class="figure" style="margin-bottom: 0;">
-        <div class="figure__media">
-          <img src="static/images/perturbations_latent_drift.png"
-               alt="Latent cosine similarity between clean and perturbed LeWM encodings.">
-        </div>
-        <figcaption class="figure__caption">
-          The perturbed images move the latent representation away from the clean encoding. As with
-          noisy actions, this geometry shift alone does not prove that the state information is gone.
-        </figcaption>
-      </figure>
+    <figure class="figure" style="max-width: 760px; margin: 1.5rem auto 0;">
+      <div class="figure__media">
+        <img src="static/images/perturbations_latent_drift.png"
+             alt="Latent cosine similarity between clean and perturbed LeWM encodings.">
+      </div>
+      <figcaption class="figure__caption">
+        The perturbed images move the latent representation away from the clean encoding. As with
+        noisy actions, this geometry shift alone does not prove that the state information is gone.
+      </figcaption>
+    </figure>
 
+    <div class="grid grid--2" style="margin-top: 1.5rem;">
       <figure class="figure" style="margin-bottom: 0;">
         <div class="figure__media">
           <img src="static/images/perturbations_direct_AgentPos_error.png"
@@ -777,19 +777,28 @@
           perturbations, even when evaluated with perturbation-invariant probes.
         </figcaption>
       </figure>
+
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media">
+          <img src="static/images/perturbations_direct_BlockPos_error.png"
+               alt="Block position recoverability error after one LeWM step under visual perturbations.">
+        </div>
+        <figcaption class="figure__caption">
+          The same pattern appears for block position: task state becomes less recoverable after
+          one predicted transition.
+        </figcaption>
+      </figure>
     </div>
 
-    <figure class="figure" style="margin-top: 1.5rem; margin-bottom: 0;">
-      <div class="figure__media">
-        <img src="static/images/perturbations_direct_BlockPos_error.png"
-             alt="Block position recoverability error after one LeWM step under visual perturbations.">
-      </div>
-      <figcaption class="figure__caption">
-        The same pattern appears for block position: perturbations do more than rotate the latent
-        into a harmless alternative basis; task state becomes less recoverable after one predicted
-        transition.
-      </figcaption>
-    </figure>
+    <div class="callout" style="margin-top: 2rem; margin-bottom: 0;">
+      <div class="callout__title">Interpretation</div>
+      <p>
+        A geometry shift alone could still be harmless if LeWM used a different but equally useful
+        representation that ordinary probes had not learned. The perturbation-invariant probes make
+        that explanation less plausible: even after training probes to handle the perturbations,
+        state recoverability drops. In this analysis, LeWM is not invariant to these visual shifts.
+      </p>
+    </div>
   </div>
 </section>
 
