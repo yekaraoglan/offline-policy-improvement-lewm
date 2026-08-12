@@ -16,7 +16,7 @@
   <meta property="og:image" content="https://yekaraoglan.github.io/offline-rl-with-le-wm/static/images/teaser.png">
   <meta name="twitter:card" content="summary_large_image">
 
-  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/style.css?v=5">
    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
@@ -59,6 +59,8 @@
       <span class="hero__author"><a href="#">Yunus Emre Karaoglan</a></span>,
       <span class="hero__author"><a href="#">Iñigo Miguel Méndez Valero</a></span>
     </p>
+
+    <p class="hero__contribution">All authors contributed equally to this work.</p>
 
     <p class="hero__meta">
       <span class="label">Supervisor:</span> Akshay L Chandra
@@ -545,6 +547,46 @@
       </figure>
     </div>
 
+    <!-- ---- RQ: reward classifier reliability -------------------------------- -->
+    <h3 class="panel__title" id="reward-reliability" style="margin: 2.5rem 0 0.75rem;">
+      Reward classifiers mostly hold recall, but false positives grow with imagined horizon
+    </h3>
+    <p>
+      We evaluate the reward heads directly on LeWM rollouts, not only on encoded dataset latents.
+      During training we therefore include imagined trajectories and use false-positive-rate
+      thresholding, with optional hard-negative mining, so the sparse classifier is explicitly tuned
+      for the kind of latent it will score inside Dream-PPO.
+    </p>
+
+    <div class="grid grid--2" style="margin-top: 1.5rem;">
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media figure__media--plate">
+          <img src="static/images/classifiers_sparse_recall_fpr.png"
+               alt="Sparse objective-met classifier recall and false-positive rate over imagined rollout horizons.">
+        </div>
+        <figcaption class="figure__caption">
+          <b>Sparse reward.</b> The plot uses stratified sampling: at each imagined horizon, 256
+          rollout states are sampled from cases where success is truly reached and from cases where
+          it is not. Recall stays consistent across rollout depth, but false positives climb with
+          horizon. This does not happen in the same way for direct encodings, so the failure is tied
+          to rollout drift rather than the success label alone.
+        </figcaption>
+      </figure>
+
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media figure__media--plate">
+          <img src="static/images/classifiers_dense_head_activations.png"
+               alt="Dense time-to-success classifier head probabilities aligned by time to success.">
+        </div>
+        <figcaption class="figure__caption">
+          <b>Dense reward.</b> Each head predicts whether success is within a different future
+          horizon. Aligning rollouts by time-to-success shows the heads activating near the right
+          point, so the dense classifier supplies a strong continuous signal before terminal success
+          is reached.
+        </figcaption>
+      </figure>
+    </div>
+
     <!-- ---- RQ: improvement stops ------------------------------------------ -->
     <h3 class="panel__title" id="improvement-stops" style="margin: 2.5rem 0 0.75rem;">
       Improvement stops well before the imagined budget runs out
@@ -737,7 +779,7 @@
      ========================================================================== -->
 <section class="section" id="visual-perturbations">
   <div class="container container--wide">
-    <h2 class="section__title">Visual Perturbations</h2>
+    <h2 class="section__title">Appendix: Visual Perturbations</h2>
     <p class="section__lede">
       As a smaller robustness check, we perturb the input image before encoding it with LeWM and
       ask whether the latent still carries the same task state. We train perturbation-invariant

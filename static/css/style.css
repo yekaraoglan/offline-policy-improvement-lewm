@@ -249,6 +249,15 @@ code {
   text-decoration-color: currentColor;
 }
 
+.hero__contribution {
+  display: block;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
 .hero__meta {
   margin: 0.75rem 0 0;
   font-size: 0.9375rem;
