@@ -121,7 +121,7 @@
     <h2 class="section__title">Abstract</h2>
 
     <p>
-      Training agents through real-world interaction is notoriously costly and challenging. World models offer a promising alternative by learning environment dynamics, enabling agents to plan and improve policies using simulated experience. JEPAs (Joint-Embedding Predictive Architectures) predict future representations rather than pixels; LeJEPA enables stable, collapse-free representation learning through SIGReg, and LeWorldModel (LeWM) extends this idea to temporal prediction directly from visual observations. While LeWM has primarily been explored as a model for planning, we investigate whether it can instead serve as the environment for reinforcement-learning policy improvement with no additional real-environment interaction. Specifically, we ask whether LeWM can provide sufficiently accurate states, transitions, and reward signals for policy optimization to take place entirely within its learned dynamics.
+      Training agents through real-world interaction is notoriously costly and challenging. World models offer a promising alternative by learning environment dynamics, enabling agents to plan and improve policies using simulated experience. A <b>Joint-Embedding Predictive Architecture (JEPA)</b> learns by predicting an abstract representation of a target observation from a context observation, rather than reconstructing every target pixel. LeJEPA uses SIGReg to avoid <b>representation collapse</b>, a failure mode in which different observations are mapped to the same or nearly identical representation and therefore lose useful information. LeWorldModel (LeWM) extends this representation-prediction approach across time, predicting future visual states after actions. While LeWM has primarily been explored as a model for planning, we investigate whether it can instead serve as the environment for reinforcement-learning policy improvement with no additional real-environment interaction. Specifically, we ask whether LeWM can provide sufficiently accurate states, transitions, and reward signals for policy optimization to take place entirely within its learned dynamics.
     </p>
 
     <p>
@@ -234,7 +234,7 @@
                alt="Expert frames go through the frozen vision encoder to an image feature, which the BC policy turns into 5-action chunks; its weights are later copied into the PPO actor-critic.">
         </div>
         <p class="panel__body">
-          We first train an action-chunked Behavioral Cloning (BC) policy on expert demonstrations while keeping the LeWM encoder frozen. Rather than acting from a single observation, the policy conditions on a stack of temporally spaced frames, with frame stride controlling the temporal spacing between observations, and predicts a chunk of future actions at each decision step. This gives the policy short-term temporal context while reducing the effective decision frequency. We compare two representations for these stacked observations: LeWM dynamics latents, which are directly predicted by the world model, and the encoder's raw CLS features, taken before projection into LeWM's dynamics space.
+          We first train an action-chunked Behavioral Cloning (BC) policy on expert demonstrations while keeping the LeWM encoder frozen. Rather than acting from a single observation, the policy conditions on a stack of temporally spaced frames, with frame stride controlling the temporal spacing between observations, and predicts a chunk of future actions at each decision step. This gives the policy short-term temporal context while reducing the effective decision frequency. We compare two representations for these stacked observations. A <b>raw CLS feature</b>, or <b>CLS token</b>, is the vision transformer's 192-dimensional summary of an entire input frame, taken directly from the encoder before LeWM's projection layer. A <b>dynamics latent</b> is the projected 192-dimensional representation in which LeWM was trained to predict future states. The two have the same size, but encode different information: the policy performs better with raw CLS features, while the world model predicts dynamics latents.
           Raw CLS features produce the stronger visual BC policy: 56.0 ± 7.7% success compared with 43.6 ± 6.2% for direct LeWM latents. We therefore use the Raw-CLS BC checkpoint as the common prior for all PPO experiments.
           This choice creates a small mismatch during imagined training: LeWM rolls the environment forward in its dynamics latent space, while the policy expects raw CLS features. We bridge the two with a learned inverse projector, trained offline to map predicted LeWM dynamics latents back into the policy’s CLS representation. This lets Dream-PPO exploit LeWM’s learned dynamics without forcing the policy itself to operate on the weaker dynamics-latent representation.
         </p>
@@ -271,8 +271,10 @@
         </p>
 
         <p class="panel__body">
-          The bridge is the learned inverse projector used by the policy. It maps LeWM's projected
-          dynamics latent back to the raw ViT CLS representation:
+          The <b>inverse projector</b>, also called the <b>bridge</b>, is a learned mapping between
+          those two representation spaces. After LeWM predicts a dynamics latent, the bridge
+          converts it into an approximation of the raw ViT CLS feature that the policy expects; it
+          does not reconstruct an RGB image. Formally, it maps:
           \[
           g:\mathbb{R}^{192}_{\text{projected}}\rightarrow\mathbb{R}^{192}_{\text{CLS}}
           \]
