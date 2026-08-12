@@ -731,8 +731,71 @@
   </div>
 </section>
 
+
 <!-- ==========================================================================
-     9. ACKNOWLEDGEMENTS — who made this possible?
+     9. APPENDIX CHECK — visual perturbations.
+     ========================================================================== -->
+<section class="section" id="visual-perturbations">
+  <div class="container container--wide">
+    <h2 class="section__title">Visual Perturbations</h2>
+    <p class="section__lede">
+      As a smaller robustness check, we perturb the input image before encoding it with LeWM and
+      ask whether the latent still carries the same task state. We train perturbation-invariant
+      probes for this analysis, so the test is not just whether a clean probe transfers, but whether
+      state remains recoverable after the representation is explicitly exposed to these shifts.
+    </p>
+
+    <figure class="figure">
+      <div class="figure__media">
+        <img src="static/images/perturbations_examples_grid.png"
+             alt="Examples of clean PushT observations and visual perturbations applied before LeWM encoding.">
+      </div>
+      <figcaption class="figure__caption">
+        The perturbations change visual appearance while preserving the underlying PushT state.
+      </figcaption>
+    </figure>
+
+    <div class="grid grid--2" style="margin-top: 1.5rem;">
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media">
+          <img src="static/images/perturbations_latent_drift.png"
+               alt="Latent cosine similarity between clean and perturbed LeWM encodings.">
+        </div>
+        <figcaption class="figure__caption">
+          The perturbed images move the latent representation away from the clean encoding. As with
+          noisy actions, this geometry shift alone does not prove that the state information is gone.
+        </figcaption>
+      </figure>
+
+      <figure class="figure" style="margin-bottom: 0;">
+        <div class="figure__media">
+          <img src="static/images/perturbations_direct_AgentPos_error.png"
+               alt="Agent position recoverability error after one LeWM step under visual perturbations.">
+        </div>
+        <figcaption class="figure__caption">
+          After a single LeWM step, agent-position recoverability degrades under visual
+          perturbations, even when evaluated with perturbation-invariant probes.
+        </figcaption>
+      </figure>
+    </div>
+
+    <figure class="figure" style="margin-top: 1.5rem; margin-bottom: 0;">
+      <div class="figure__media">
+        <img src="static/images/perturbations_direct_BlockPos_error.png"
+             alt="Block position recoverability error after one LeWM step under visual perturbations.">
+      </div>
+      <figcaption class="figure__caption">
+        The same pattern appears for block position: perturbations do more than rotate the latent
+        into a harmless alternative basis; task state becomes less recoverable after one predicted
+        transition.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     10. ACKNOWLEDGEMENTS — who made this possible?
      ========================================================================== -->
 <section class="section" id="acknowledgements">
   <div class="container container--wide">
