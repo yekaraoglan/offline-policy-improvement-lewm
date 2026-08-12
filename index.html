@@ -254,15 +254,27 @@
                alt="Expert demos are encoded to raw CLS latents and projected by LeWM; the dense reward classifier and the de-projector are both trained on those projected latents, offline.">
         </div>
         <p class="panel__body">
-          <span class="todo">FILL</span> How the reward probes are trained, for both reward modes:
-          the sparse one (probe-declared success, which also ends the episode) and the dense one
-          (time-to-success classifier). What each probe reads, what it is trained on, and how well
-          it fits.
+          Both reward models are trained offline on frozen LeWM latents, so Dream-PPO can score
+          imagined states without querying the simulator. The sparse reward is a binary
+          <code>objective_met</code> probe: it predicts whether the current latent already satisfies
+          the PushT success condition, and in the dream loop this prediction supplies both the
+          sparse reward and the episode termination signal. Since a false positive ends an imagined
+          episode as a fake success, we tune its decision threshold on validation data for a target
+          false-positive rate, and optionally mine high-scoring negatives for a second training pass.
         </p>
 
         <p class="panel__body">
-           The deprojector is trained offline using the expert trajectories to map LeWM's projected dynamics latent back to the
-          raw ViT CLS representation:
+          The dense reward is a multi-head sigmoid classifier over the same latent space. Each head
+          predicts whether success will occur within a future horizon, for example 2, 5, 10 or 16
+          world-model steps. PPO uses these probabilities as a continuous shaping signal, rather than
+          thresholding them into a second terminal reward. To make both reward probes match the
+          states they will see during Dream-PPO, training can mix encoded ground-truth latents with
+          LeWM imagined rollouts generated from expert initial states and ground-truth action chunks.
+        </p>
+
+        <p class="panel__body">
+          The bridge is the learned inverse projector used by the policy. It maps LeWM's projected
+          dynamics latent back to the raw ViT CLS representation:
           \[
           g:\mathbb{R}^{192}_{\text{projected}}\rightarrow\mathbb{R}^{192}_{\text{CLS}}
           \]
