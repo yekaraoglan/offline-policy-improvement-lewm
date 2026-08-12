@@ -610,45 +610,50 @@
 
     <!-- ---- RQ: OOD actions and latent drift --------------------------------- -->
     <h3 class="panel__title" id="ood-drift" style="margin: 2.5rem 0 0.75rem;">
-      <span class="todo">FILL</span> Out-of-distribution actions accelerate latent rollout drift
-      and reduce state recoverability
+      Out-of-distribution actions alter latent geometry and reduce state recoverability
     </h3>
     <p>
-      <span class="todo">FILL</span> Separate world-model drift from probe error and say which one
-      dominates. Suggested figures: probe false-positive rate against imagination horizon, and
-      latent drift against horizon.
+      Dream-PPO does not stay on the expert action distribution: exploration produces action
+      chunks that LeWM did not see as often during training. To isolate world-model failure from
+      probe failure, we generated a separate noisy-action dataset in the real PushT environment,
+      encoded those futures with LeWM, and trained probes on that distribution as well. This makes
+      the test stricter: if imagined rollouts lose accuracy, the explanation is less likely to be
+      "the probe has never seen these states" and more likely to be that the imagined latent itself
+      contains less recoverable task state.
     </p>
 
     <div class="grid grid--2" style="margin-top: 1.5rem;">
       <figure class="figure" style="margin-bottom: 0;">
         <div class="figure__media">
-          <!-- FILL: probe false-positive rate vs imagination horizon -->
-          <div class="media-placeholder"><code>probe_vs_horizon.png</code></div>
+          <img src="static/images/OOD_actions_latent_drift.png"
+               alt="Latent cosine similarity to encoded ground-truth futures under increasingly noisy action rollouts.">
         </div>
         <figcaption class="figure__caption">
-          <span class="todo">FILL</span> The probe is not uniformly wrong, it is wrong with depth.
-          Note where dream episodes typically declare success on this axis.
+          Noisy actions change the latent geometry: imagined latents move away from the encoded
+          futures produced by the real environment, and the gap grows with rollout depth and action
+          noise.
         </figcaption>
       </figure>
 
       <figure class="figure" style="margin-bottom: 0;">
         <div class="figure__media">
-          <!-- FILL: latent drift vs horizon, or imagined-vs-real scatter -->
-          <div class="media-placeholder"><code>latent_drift.png</code></div>
+          <img src="static/images/OOD_actions_probe_error.png"
+               alt="State probe error under noisy action rollouts, comparing imagined LeWM latents against encoded real-environment futures.">
         </div>
         <figcaption class="figure__caption">
-          <span class="todo">FILL</span> How far the imagined latent has moved from the latent the
-          simulator would have produced, as a function of horizon.
+          A geometry shift alone could still be harmless if it encoded the same state in a different
+          basis. The noisy-action probes test that alternative directly: task state becomes less
+          recoverable from imagined latents than from encoded real futures.
         </figcaption>
       </figure>
     </div>
 
     <div class="callout" style="margin-top: 2rem; margin-bottom: 0;">
-      <div class="callout__title">Caveat</div>
+      <div class="callout__title">Interpretation</div>
       <p>
-        <span class="todo">FILL</span> The honest limitation — e.g. the shared BC prior was
-        itself picked by real-env success, so a dream run started from it is not
-        interaction-free end to end.
+        The key distinction is latent drift versus usable state information. The cosine plot shows
+        that OOD actions change the representation; the probe-error plot shows why that matters for
+        control, because agent and block state are harder to recover from the imagined latent itself.
       </p>
     </div>
   </div>
